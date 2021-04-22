@@ -1,0 +1,61 @@
+clc;
+close all;
+clear all;
+
+xs=imread('D:\\red_fort.jpg'); % Seret Image
+xm=imread('D:\\animal.jpg'); % Non Secret Image
+
+%converting RCB color model of images to YCbCr color model
+x_s=rgb2ycbcr(xs);
+x_m=rgb2ycbcr(xm);
+
+%Extracting the Y component of images from YCbCr color model
+ys=x_s(:,:,1);
+ym=x_m(:,:,1);
+
+[p_s,q_s]=size(ys);
+[p_m,q_m]=size(ym);    
+
+%Binary conversion of original image
+x_bin_s=de2bi(ys);
+x_bin_m=de2bi(ym);
+
+x_bin1_s=double(x_bin_s);
+
+
+[row_s,column_s]=size(x_bin1_s);
+
+% Replacing 4 LSB bits of pixels of non secret message image with 4 MSB bits of pixels of secret image
+x_bin1_m=double(x_bin_m);
+for i=1:row_s
+        x_bin1_m(i,1:4)=x_bin1_s(i,5:8);
+end
+% After this for loop all the resulting non secret image obtained is known as Stego Image
+
+% Recovery of secret image from the Stego Image  
+reco=zeros(row_s,8)
+for j=1:row_s
+reco(j,5:8)=x_bin1_m(j,1:4); 
+end
+yreco=bi2de(reco); % Converting binary form of pixels of Recovered Secret Image to decimal form 
+
+yr=bi2de(x_bin1_m); % Converting binary form of pixels of Stego Image to decimal form
+z=reshape(uint8(yr),[p_m,q_m]);
+
+PSNR=psnr(z,ym) % Peak-Signal to Noise Ratio of original non secret image and Stego Image
+disp("Mean Square Error = ")
+MSE=immse(z,ym) % Mean Square Error between original non secret image and Stego Image  
+
+zreco=reshape(uint8(yreco),[p_s,q_s]);
+subplot(2,2,1);
+imshow(ym);
+title('Original Image');
+subplot(2,2,2);
+imshow(ys);
+title("Secret Image");
+subplot(2,2,3);
+imshow(z);
+title("Stego Image");
+subplot(2,2,4);
+imshow(zreco);
+title("Recover Image");
