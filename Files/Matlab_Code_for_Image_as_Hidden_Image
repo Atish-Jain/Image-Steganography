@@ -1,3 +1,7 @@
+% In this code a secret image (xs) was hidden in an ordinary or non secret image (xm) and transmitted.
+% The PSNR and MSE values are also calculted for the Stego Image 
+% At the receiver side the original secret image was extracted from the non secret image.
+
 clc;
 close all;
 clear all;
