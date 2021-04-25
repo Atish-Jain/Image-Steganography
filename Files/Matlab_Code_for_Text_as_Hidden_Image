@@ -1,0 +1,68 @@
+% In this code a secret image (xs) was hidden in an ordinary or non secret image (xm) and transmitted.
+% The PSNR and MSE values are also calculted for the Stego Image
+% At the receiver side the original secret text was extracted from the non secret image.
+
+clc;
+close all;
+clear all;
+
+xs=input("Enter message",'s'); % Secret Text Message
+xa_1=double(xs);
+xa=xa_1';
+%Image read
+xm=imread('D:\\animal.jpg');
+x_m=rgb2ycbcr(xm);
+
+ym=x_m(:,:,1);
+
+[p_s,q_s]=size(xa);
+[p_m,q_m]=size(ym);    
+
+%Binary conversion of original image and text message
+x_bin_s=de2bi(xa,8);
+x_bin_m=de2bi(ym);
+
+x_bin1_s=double(x_bin_s);
+
+
+[row_s,column_s]=size(x_bin1_s);
+
+% Replacing all bits of each character with LSBs of pixels of non secret image
+x_bin1_m=double(x_bin_m);
+count_m=1;
+for i=1:row_s
+count=8;
+while (count>0)
+        x_bin1_m(count_m,1)=x_bin1_s(i,count);
+count_m=count_m+1;
+count=count-1;
+end
+end
+
+yr=bi2de(x_bin1_m); %Convert Binary form of pixels to Decimal form again
+z=reshape(uint8(yr),[p_m,q_m]);
+PSNR=psnr(z,ym)
+disp("Mean Square Error = ")
+MSE=immse(z,ym)
+subplot(1,2,1);
+imshow(ym);
+title('Original Image');
+subplot(1,2,2);
+imshow(z);
+title("stego image");
+
+x_bin_z=de2bi(z,8);
+x_bin1_z=double(x_bin_z);
+% Extracting secret text from non secret image 
+om_1=zeros(row_s,8);
+count_decode=1;
+for j=1:row_s
+count=8;
+while(count>0)
+        om_1(j,count)=x_bin1_m(count_decode,1);
+count=count-1;
+count_decode=count_decode+1;
+end
+end
+om=(bi2de(om_1))';
+om_2=char(om)
